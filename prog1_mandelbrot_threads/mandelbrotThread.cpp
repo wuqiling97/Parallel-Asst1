@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <thread>
+#include <ctime>
 
 #include "CycleTimer.h"
 
@@ -49,6 +50,7 @@ typedef struct {
 //
 // Thread entrypoint.
 void* workerThreadStart(void* threadArgs) {
+	clock_t timestart = clock();
 
 	WorkerArgs* args = static_cast<WorkerArgs*>(threadArgs);
 	WorkerArgs& arg = *args;
@@ -68,7 +70,8 @@ void* workerThreadStart(void* threadArgs) {
 		}
 	}
 
-	//printf("Hello world from thread %d\n", arg.threadId);
+	clock_t timeend = clock();
+	printf("thread %d use %f sec\n", arg.threadId, double(timeend - timestart) / CLOCKS_PER_SEC);
 
 	return NULL;
 }
