@@ -48,9 +48,10 @@ typedef struct {
 // workerThreadStart --
 //
 // Thread entrypoint.
-void* workerThreadStart(WorkerArgs& arg) {
+void* workerThreadStart(void* threadArgs) {
 
-	//WorkerArgs* args = static_cast<WorkerArgs*>(threadArgs);
+	WorkerArgs* args = static_cast<WorkerArgs*>(threadArgs);
+	WorkerArgs& arg = *args;
 
 	// TODO: Implement worker thread here.
 
@@ -111,11 +112,9 @@ void mandelbrotThread(
 		args[i].output = output + i*dh*width;
 		args[i].y0 = y0; args[i].y1 = y1;
 		args[i].startRow = i * dh;
-		//args[i].y0 = y0 + i * dh * dy;
-		//args[i].y1 = y0 + (i + 1) * dh * dy;
+
 		if (i == numThreads - 1) {
 			args[i].height = height - dh * (numThreads - 1);
-			//args[i].y1 = y1;
 		}
 		//printf("i=%d, h = %d, startrow = %d\n", i, args[i].height, args[i].startRow);
 	}
@@ -126,10 +125,10 @@ void mandelbrotThread(
 
 	for (int i = 0; i < numThreads - 1; i++)
 	{
-		workers[i] = std::thread(workerThreadStart, args[i + 1]);
+		workers[i] = std::thread(workerThreadStart, &args[i + 1]);
 	}
 
-	workerThreadStart(args[0]);
+	workerThreadStart(&args[0]);
 
 	// wait for worker threads to complete
 	for (int i = 0; i < numThreads - 1; i++)
