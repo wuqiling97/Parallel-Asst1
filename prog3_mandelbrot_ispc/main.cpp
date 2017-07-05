@@ -30,7 +30,7 @@ extern "C"
 		int width, int height,
 		int maxIterations,
 		int *output,
-		int taskNum);
+		const int taskNum);
 }
 #else
 #include "mandelbrot_ispc.h"
@@ -125,11 +125,9 @@ int main(int argc, char** argv) {
 					return 1;
 				}
 			}
-		}
-		else
-		{
-			if (strcmp(argv[i], "-t") == 0)
+			else if (strcmp(argv[i], "-t") == 0)
 			{
+				printf("use task\n");
 				useTasks = true;
 				if (i < argc - 1) {
 					taskNum = atoi(argv[i + 1]);
@@ -141,7 +139,10 @@ int main(int argc, char** argv) {
 					}
 				}
 			}
-			else if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "?") == 0)
+		}
+		else
+		{
+			if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "?") == 0)
 			{
 				usage(argv[0]);
 				return 1;
