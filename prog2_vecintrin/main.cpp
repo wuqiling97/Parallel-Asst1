@@ -237,40 +237,42 @@ void clampedExpSerial(float* values, int* exponents, float* output, int N) {
 }
 
 void clampedExpVector(float* values, int* exponents, float* output, int N) {
-	__cmu418_mask maskAll = _cmu418_init_ones();
+	__cmu418_mask maskAll;
 	__cmu418_vec_int zero = _cmu418_vset_int(0);
 	__cmu418_vec_int one = _cmu418_vset_int(1);
 	__cmu418_vec_float max = _cmu418_vset_float(9.999999f);
-	cout << zero << one << max;
+	//cout << zero << one << max;
 
 	for (int i = 0; i < N; i += VECTOR_WIDTH) {
+		maskAll = _cmu418_init_ones(min(N - i, VECTOR_WIDTH)); // prevent out of bound
 		__cmu418_vec_float x;
 		__cmu418_vec_int y;
 		_cmu418_vload_float(x, values + i, maskAll);
 		_cmu418_vload_int(y, exponents + i, maskAll);
-		__cmu418_vec_float result = _cmu418_vset_float(1.); // result = 1
+		__cmu418_vec_float result;
+		_cmu418_vset_float(result, 1.f, maskAll);               // result = 1
 
 		__cmu418_mask maskIs0, maskNot0;
-		_cmu418_veq_int(maskIs0, y, zero, maskAll); // if y==0  result = 1
-		maskNot0 = _cmu418_mask_not(maskIs0);       // else {
+		_cmu418_veq_int(maskIs0, y, zero, maskAll);             // if y==0  result = 1
+		maskNot0 = _cmu418_mask_not(maskIs0);                   // else 
 
-		_cmu418_vmove_float(result, x, maskNot0);   // result = x
-		__cmu418_vec_int count;
-		_cmu418_vsub_int(count, y, one, maskAll);   // int count = y-1
+		_cmu418_vmove_float(result, x, maskNot0);               // result = x
+		__cmu418_vec_int count;						            
+		_cmu418_vsub_int(count, y, one, maskAll);               // int count = y-1
 
 		__cmu418_mask maskCntgt0;  // count > 0
 		_cmu418_vgt_int(maskCntgt0, count, zero, maskAll);
 
-		while (_cmu418_cntbits(maskCntgt0) > 0) {   // while(count > 0) {
+		while (_cmu418_cntbits(maskCntgt0) > 0) {               // while(count > 0) {
 			_cmu418_vmult_float(result, result, x, maskCntgt0); // result = result * x;
-			_cmu418_vsub_int(count, count, one, maskAll);  // count--; } 
+			_cmu418_vsub_int(count, count, one, maskAll);       // count--; } 
 			_cmu418_vgt_int(maskCntgt0, count, zero, maskAll); // update maskCountGt0
 		}
 		__cmu418_mask needClamp;
-		_cmu418_vgt_float(needClamp, result, max, maskAll); // if result > 9.999...
-		_cmu418_vmove_float(result, max, needClamp);        // result = 9.999
+		_cmu418_vgt_float(needClamp, result, max, maskAll);     // if result > 9.999...
+		_cmu418_vmove_float(result, max, needClamp);            // result = 9.999
 
-		_cmu418_vstore_float(output, result, maskAll);
+		_cmu418_vstore_float(output+i, result, maskAll);
 	}
 }
 
