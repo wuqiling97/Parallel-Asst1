@@ -17,6 +17,14 @@ extern Logger CMU418Logger;
 template <typename T>
 struct __cmu418_vec {
   T value[VECTOR_WIDTH];
+  friend std::ostream& operator<<(ostream& out, const __cmu418_vec<T>& vec) {
+	  out << "[";
+	  for (int i = 0; i < VECTOR_WIDTH; i++) {
+		  out << vec.value[i] << ' ';
+	  }
+	  out << "]\n";
+	  return out;
+  }
 };
 
 // Declare a mask with __cmu418_mask
