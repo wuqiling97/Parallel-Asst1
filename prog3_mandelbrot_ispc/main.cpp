@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <algorithm>
+#include <cstdlib>
 #include "CycleTimer.h"
 
 #ifdef min
@@ -28,7 +29,8 @@ extern "C"
 		float x1, float y1,
 		int width, int height,
 		int maxIterations,
-		int *output);
+		int *output,
+		int taskNum);
 }
 #else
 #include "mandelbrot_ispc.h"
@@ -91,8 +93,8 @@ void usage(const char* progname) {
 
 int main(int argc, char** argv) {
 
-    const unsigned int width = 1200;
-    const unsigned int height = 800;
+    const unsigned int width = 1280;
+    const unsigned int height = 960;
     const int maxIterations = 256;
 
     float x0 = -2;
@@ -101,6 +103,7 @@ int main(int argc, char** argv) {
     float y1 = 1;
 
     bool useTasks = false;
+	int taskNum = 2;
 
     // parse commandline options ////////////////////////////////////////////
 
@@ -128,6 +131,15 @@ int main(int argc, char** argv) {
 			if (strcmp(argv[i], "-t") == 0)
 			{
 				useTasks = true;
+				if (i < argc - 1) {
+					taskNum = atoi(argv[i + 1]);
+					if (taskNum == 0) // not number
+						taskNum = 2;
+					if (height % taskNum != 0) {
+						printf("height %% taskNum != 0\n");
+						exit(1);
+					}
+				}
 			}
 			else if (strcmp(argv[i], "help") == 0 || strcmp(argv[i], "?") == 0)
 			{
@@ -201,7 +213,7 @@ int main(int argc, char** argv) {
         //
         for (int i = 0; i < 3; ++i) {
             double startTime = CycleTimer::currentSeconds();
-            mandelbrot_ispc_withtasks(x0, y0, x1, y1, width, height, maxIterations, output_ispc_tasks);
+            mandelbrot_ispc_withtasks(x0, y0, x1, y1, width, height, maxIterations, output_ispc_tasks, taskNum);
             double endTime = CycleTimer::currentSeconds();
             minTaskISPC = std::min(minTaskISPC, endTime - startTime);
         }
@@ -224,6 +236,7 @@ int main(int argc, char** argv) {
     delete[] output_ispc;
     delete[] output_ispc_tasks;
 
+	system("pause");
 
     return 0;
 }
