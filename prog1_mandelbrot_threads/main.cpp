@@ -74,8 +74,8 @@ bool verifyResult (int *gold, int *result, int width, int height) {
 
 int main(int argc, char** argv) {
 
-    const unsigned int width = 1280;
-    const unsigned int height = 960;
+    const unsigned int width = 12800;
+    const unsigned int height = 9600;
     const int maxIterations = 256;
     int numThreads = 2;
 
@@ -130,7 +130,7 @@ int main(int argc, char** argv) {
     //
     memset(output_serial, 0, width * height * sizeof(int));
     double minSerial = 1e30;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 1; ++i) {
         double startTime = CycleTimer::currentSeconds();
         mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
         double endTime = CycleTimer::currentSeconds();
@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
     //
     memset(output_thread, 0, width * height * sizeof(int));
     double minThread = 1e30;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 1; ++i) {
         double startTime = CycleTimer::currentSeconds();
         mandelbrotThread(numThreads, x0, y0, x1, y1, width, height, maxIterations, output_thread);
         double endTime = CycleTimer::currentSeconds();
